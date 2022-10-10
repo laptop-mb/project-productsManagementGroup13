@@ -56,9 +56,8 @@ const updateUser = async function(req,res){
         {
             if(userVal.isPassword(data.password))
             return res.status(400).send({status:false,message:"password is invalid"})
-            data.password = await bcrypt.hash(data.password, 10).then(function(err, hash) {
-                return res.status(400).send({status:false,message:err})
-            });
+            data.password = await bcrypt.hash(data.password, 10)
+            
         }
         if(data.address!=undefined)
         {
