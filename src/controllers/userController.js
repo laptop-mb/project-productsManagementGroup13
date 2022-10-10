@@ -1,5 +1,7 @@
 const userModel = require("../models/userModel")
 const userVal = require("../validators/userValidator")
+const awsCon = require("../controllers/awsController")
+const bcrypt = require('bcrypt');
 
 const createUser = async function(req,res){
     try{
@@ -19,8 +21,10 @@ const updateUser = async function(req,res){
     try{
 
         let data = req.body
+        let files = req.files
         let userId = req.params.userId
-        if(!Object.keys(data).length)
+
+        if(!Object.keys(data).length && !files)
         return res.status(400).send({status:false,message:"Send data in body"})
 
         if(data.fname!=undefined)
@@ -38,10 +42,10 @@ const updateUser = async function(req,res){
             if(userVal.isValidEmail(data.email))
             return res.status(400).send({status:false,message:"email is invalid"})
         }
-        if(data.profileImage!=undefined)
+        if(files && files.length>0)
         {
-            if(!userVal.isValids3(data.profileImage))
-            return res.status(400).send({status:false,message:"s3 url is invalid"})
+            let url = await awsCon.uploadFile(files[0])
+            data.profileImage = url.msg
         }
         if(data.phone!=undefined)
         {
@@ -52,7 +56,7 @@ const updateUser = async function(req,res){
         {
             if(userVal.isPassword(data.password))
             return res.status(400).send({status:false,message:"password is invalid"})
-            data.password = bcrypt.hash(data.password, saltRounds, function(err, hash) {
+            data.password = await bcrypt.hash(data.password, 10).then(function(err, hash) {
                 return res.status(400).send({status:false,message:err})
             });
         }
@@ -85,8 +89,9 @@ const updateUser = async function(req,res){
                 }
             }
         }
-        let createUser = userModel.findOneAndUpdate({_id:userId},data,{new:true})
-        return res.status(200).send({status:false,data:createUser})
+        
+        let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
+         return res.status(200).send({status:false,data:createUser})
 
     }
     catch(error){
