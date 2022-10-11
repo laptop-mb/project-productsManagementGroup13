@@ -1,6 +1,6 @@
 const userModel = require("../models/userModel")
 const userVal = require("../validators/userValidator")
-
+const jwt = require("jsonwebtoken")
 
 const bcrypt = require("bcrypt")
 
@@ -9,48 +9,45 @@ const awsCon = require("../controllers/awsController")
 const createUser = async function(req,res){
     try{
         let data = req.body
+        let files = req.files
         // let {fname, lname,email,profileImage, phone,password, address } = data
 
         if(!Object.keys(data).length && !files)
         return res.status(400).send({status:false,message:"Send data in body"})
 
-        if(data.fname!=undefined)
         {
             if(userVal.isValidName(data.fname))
             return res.status(400).send({status:false,message:"fname is invalid"})
         }
 
-        if(data.lname!=undefined)
         {
             if(userVal.isValidName(data.lname))
             return res.status(400).send({status:false,message:"lname is invalid"})
         }
-        if(data.email!=undefined)
         {
             if(userVal.isValidEmail(data.email))
             return res.status(400).send({status:false,message:"email is invalid"})
         }
-        if(data.profileImage!=undefined)
+        if(files && files.length>0)
         {
-            if(!userVal.isValids3(data.profileImage))
-            return res.status(400).send({status:false,message:"s3 url is invalid"})
+            let url = await awsCon.uploadFile(files[0])
+            data.profileImage = url
+        }else{
+            return res.status(400).send({status:false,message:"files is required"})
         }
-        if(data.phone!=undefined)
         {
             if(userVal.isValidMobile(data.phone))
             return res.status(400).send({status:false,message:"phone is invalid"})
         }
-        if(data.password!=undefined)
         {
             if(userVal.isPassword(data.password))
             return res.status(400).send({status:false,message:"password is invalid"})
-            data.password = bcrypt.hash(data.password, 10, function(err, hash) {
-                return res.status(400).send({status:false,message:err})
-            });
+            let dataHash = await bcrypt.hash(data.password, 10)
+            if(!dataHash) return res.status(400).send({status:false,message:"Cant hash password"})
+            data.password = dataHash
+            
         }
-        if(data.address!=undefined)
         {data.address = JSON.parse(data.address)
-            if(data.address.shipping!=undefined)
             {
                 if(data.address.shipping.street!=undefined)
                 {if(userVal.isValidName(data.address.shipping.street))
@@ -64,7 +61,6 @@ const createUser = async function(req,res){
                 
                 }
             }
-            if(data.address.billing!=undefined)
             {
                 if(data.address.billing.street!=undefined)
                 {if(userVal.isValidName(data.address.billing.street))
@@ -202,11 +198,22 @@ const loginUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "wrong password" })
         }
 
+        let iat = Date.now()
+        let exp = (iat) + (60 * 1000)
+        //token credentials
+        let token = jwt.sign(
+            {
+                userId: user._id.toString(),
+                iat: iat,
+                exp: exp
+            },
+            "project/productManagementGroup13"// => secret key
+        );
+
         return res.status(200).send({ status: true, message: "Success", data: { userId: user._id, token: token } })
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
 
-module.exports.createUser = createUser
-module.exports.updateUser = updateUser
+module.exports ={ createUser,updateUser,loginUser}
