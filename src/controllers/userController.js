@@ -12,7 +12,7 @@ const createUser = async function(req,res){
         let files = req.files
         // let {fname, lname,email,profileImage, phone,password, address } = data
 
-        if(!Object.keys(data).length && !files)
+        if(!Object.keys(data).length || !files)
         return res.status(400).send({status:false,message:"Send data in body"})
 
         {
@@ -27,6 +27,9 @@ const createUser = async function(req,res){
         {
             if(userVal.isValidEmail(data.email))
             return res.status(400).send({status:false,message:"email is invalid"})
+            const dataEmail= await userModel.findOne({email:data.email})
+            if(dataEmail)
+            return res.status(400).send({status:false,message:"email already exists"})
         }
         if(files && files.length>0)
         {
@@ -38,6 +41,10 @@ const createUser = async function(req,res){
         {
             if(userVal.isValidMobile(data.phone))
             return res.status(400).send({status:false,message:"phone is invalid"})
+            const dataPhone= await userModel.findOne({phone:data.phone})
+            if(dataPhone)
+            return res.status(400).send({status:false,message:"phone already exists"})
+
         }
         {
             if(userVal.isPassword(data.password))
@@ -173,13 +180,33 @@ const updateUser = async function(req,res){
             }
         }
         
-        //let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
-         return res.status(200).send({status:false,data:data})
+        let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
+         return res.status(200).send({status:false,data:createUser})
 
     }
     catch(error){
         res.status(500).send({msg:error.message})
     }
+}
+
+const getUser = async function(req,res){
+    try{
+        //check in authorization valid obj Id
+        let userId = req.params.userId
+
+        const userData = await userModel.findById(userId)
+        if(!userData)
+        return res.status(404).send({status:false,message:"User not found"})
+
+        res.status(200).send({status:true,message:"Success",data:userData})
+
+
+
+    }
+    catch(err){
+        res.status(500).send({msg:err.message})
+    }
+
 }
 
 
@@ -216,4 +243,4 @@ const loginUser = async function (req, res) {
     }
 }
 
-module.exports ={ createUser,updateUser,loginUser}
+module.exports ={ createUser,updateUser,loginUser,getUser}
