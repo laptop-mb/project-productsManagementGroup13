@@ -127,9 +127,9 @@ const isValidPincode = function (pincode) {
         if (!isValidateNum(pincode)) {
             return "pincode  should be given and type string! "
         }
-        if (whitespace(pincode)) {
-            return "Make sure pincode  should not have space ! " 
-        }
+        // if (whitespace(pincode)) {
+        //     return "Make sure pincode  should not have space ! " 
+        // }
 
         let Pincode = isPincode(pincode)
         if (Pincode == false) {

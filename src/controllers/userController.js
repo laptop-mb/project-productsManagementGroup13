@@ -1,17 +1,17 @@
 const userModel = require("../models/userModel")
 const userVal = require("../validators/userValidator")
 
+
 const bcrypt = require("bcrypt")
 
 const awsCon = require("../controllers/awsController")
-const bcrypt = require('bcrypt');
 
 const createUser = async function(req,res){
     try{
         let data = req.body
         // let {fname, lname,email,profileImage, phone,password, address } = data
 
-        if(!Object.keys(data).length)
+        if(!Object.keys(data).length && !files)
         return res.status(400).send({status:false,message:"Send data in body"})
 
         if(data.fname!=undefined)
@@ -61,6 +61,7 @@ const createUser = async function(req,res){
                 }if(data.address.shipping.pincode!=undefined)
                 {if(userVal.isValidPincode(data.address.shipping.pincode))
                 return res.status(400).send({status:false,message:"shipping pincode is invalid"})
+                
                 }
             }
             if(data.address.billing!=undefined)
@@ -79,7 +80,7 @@ const createUser = async function(req,res){
         }
 
         let savedData = await userModel.create(data)
-        res.status(201).send({  "status": true,"message": "User created successfully",data: savedData})
+      return   res.status(201).send({  "status": true,"message": "User created successfully",data: savedData})
  
         
 
