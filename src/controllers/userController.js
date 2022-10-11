@@ -10,7 +10,6 @@ const createUser = async function(req,res){
     try{
         let data = req.body
         let files = req.files
-        // let {fname, lname,email,profileImage, phone,password, address } = data
 
         if(!Object.keys(data).length || !files)
         return res.status(400).send({status:false,message:"Send data in body"})
@@ -31,12 +30,12 @@ const createUser = async function(req,res){
             if(dataEmail)
             return res.status(400).send({status:false,message:"email already exists"})
         }
-        if(files && files.length>0)
+        if(files[0].fieldname=="profileImage" && files && files.length>0)
         {
             let url = await awsCon.uploadFile(files[0])
             data.profileImage = url
         }else{
-            return res.status(400).send({status:false,message:"files is required"})
+            return res.status(400).send({status:false,message:"profileImage is required"})
         }
         {
             if(userVal.isValidMobile(data.phone))
@@ -54,32 +53,30 @@ const createUser = async function(req,res){
             data.password = dataHash
             
         }
-        {data.address = JSON.parse(data.address)
-            {
-                if(data.address.shipping.street!=undefined)
-                {if(userVal.isValidName(data.address.shipping.street))
-                return res.status(400).send({status:false,message:"shipping street is invalid"})
-                }if(data.address.shipping.city!=undefined)
-                {if(userVal.isValidName(data.address.shipping.city))
-                return res.status(400).send({status:false,message:"shipping city is invalid"})
-                }if(data.address.shipping.pincode!=undefined)
-                {if(userVal.isValidPincode(data.address.shipping.pincode))
-                return res.status(400).send({status:false,message:"shipping pincode is invalid"})
-                
-                }
-            }
-            {
-                if(data.address.billing.street!=undefined)
-                {if(userVal.isValidName(data.address.billing.street))
-                return res.status(400).send({status:false,message:"billing street is invalid"})
-                }if(data.address.billing.city!=undefined)
-                {if(userVal.isValidName(data.address.billing.city))
-                return res.status(400).send({status:false,message:"billing city is invalid"})
-                }if(data.address.billing.pincode!=undefined)
-                {if(userVal.isValidPincode(data.address.billing.pincode))
-                return res.status(400).send({status:false,message:"billing pincode is invalid"})
-                }
-            }
+        try{data.address = JSON.parse(data.address)}
+        catch{return res.status(400).send({status:false,message:"address not given or invalid format"})
+        }   
+        if(!data.address.shipping || !data.address.billing)
+            return res.status(400).send({status:false,message:"shipping or billing address not given"})
+        
+        {
+            if(userVal.isValidName(data.address.shipping.street))
+            return res.status(400).send({status:false,message:"shipping street is not given or invalid"})
+            if(userVal.isValidName(data.address.shipping.city))
+            return res.status(400).send({status:false,message:"shipping city is not given or invalid"})
+            if(userVal.isValidPincode(data.address.shipping.pincode))
+            return res.status(400).send({status:false,message:"shipping pincode is not given or invalid"})
+            
+            
+        }
+        {
+            if(userVal.isValidName(data.address.billing.street))
+            return res.status(400).send({status:false,message:"billing street is not given or invalid"})
+            if(userVal.isValidName(data.address.billing.city))
+            return res.status(400).send({status:false,message:"billing city is not given or invalid"})
+            if(userVal.isValidPincode(data.address.billing.pincode))
+            return res.status(400).send({status:false,message:"billing pincode is not given or invalid"})
+            
         }
 
         let savedData = await userModel.create(data)
