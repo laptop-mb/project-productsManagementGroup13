@@ -41,26 +41,38 @@ const updateUser = async function(req,res){
         {
             if(userVal.isValidEmail(data.email))
             return res.status(400).send({status:false,message:"email is invalid"})
+            const dataEmail= await userModel.findOne({email:data.email})
+            if(dataEmail)
+            return res.status(400).send({status:false,message:"email already exists"})
+
         }
         if(files && files.length>0)
         {
             let url = await awsCon.uploadFile(files[0])
-            data.profileImage = url.msg
+            data.profileImage = url
         }
         if(data.phone!=undefined)
         {
             if(userVal.isValidMobile(data.phone))
             return res.status(400).send({status:false,message:"phone is invalid"})
+            const dataPhone= await userModel.findOne({phone:data.phone})
+            if(dataPhone)
+            return res.status(400).send({status:false,message:"phone already exists"})
+
+
         }
         if(data.password!=undefined)
         {
             if(userVal.isPassword(data.password))
             return res.status(400).send({status:false,message:"password is invalid"})
-            data.password = await bcrypt.hash(data.password, 10)
+            let dataHash = await bcrypt.hash(data.password, 10)
+            if(!dataHash) return res.status(400).send({status:false,message:"Cant hash password"})
+            data.password = dataHash
             
         }
         if(data.address!=undefined)
         {
+            data.address = JSON.parse(data.address)
             if(data.address.shipping!=undefined)
             {
                 if(data.address.shipping.street!=undefined)
@@ -89,8 +101,8 @@ const updateUser = async function(req,res){
             }
         }
         
-        let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
-         return res.status(200).send({status:false,data:createUser})
+        //let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
+         return res.status(200).send({status:false,data:data})
 
     }
     catch(error){
