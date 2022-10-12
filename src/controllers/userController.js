@@ -54,7 +54,7 @@ const createUser = async function(req,res){
             
         }
         try{data.address = JSON.parse(data.address)}
-        catch{return res.status(400).send({status:false,message:"address not given or invalid format"})
+        catch(err){return res.status(400).send({status:false,message:"address not given or invalid",msg:err.message})
         }   
         if(!data.address.shipping || !data.address.billing)
             return res.status(400).send({status:false,message:"shipping or billing address not given"})
