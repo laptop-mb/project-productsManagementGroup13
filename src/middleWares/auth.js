@@ -10,12 +10,9 @@ const Authentication = async function (req, res, next) {
         let token = req.headers.Authorization
         if (!token) return res.status(400).send({ status: false, message: 'TOKEN is missing !!!' });
 
-        console.log({ token: token })
+        // console.log({ token: token })
 
-        // let user = token.split(' ');
-
-        // console.log({ token: user })
-
+        
        let decodedToken =  jwt.verify( token, "project/productManagementGroup13",)
         if(!decodedToken) return res.status(400).send({msg: "invalid token"})
             
@@ -41,9 +38,6 @@ const Authorization = async function (req, res, next)  {
         // authorizing the user
         if (userId != req.userId) return res.status(403).send({ status: false, message: "user not authorized" })
 
-        // sending whole user document to global
-        req.checkUser = checkUser;
-        next();
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
