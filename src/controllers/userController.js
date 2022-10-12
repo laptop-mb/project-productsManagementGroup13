@@ -221,16 +221,15 @@ const loginUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "wrong password" })
         }
 
-        let iat = Date.now()
-        let exp = (iat) + (60 * 1000)
+        // let iat = Date.now()
+        // let exp = (iat) + (60 * 1000)
         //token credentials
         let token = jwt.sign(
             {
                 userId: user._id.toString(),
-                iat: iat,
-                exp: exp
             },
-            "project/productManagementGroup13"// => secret key
+            "project/productManagementGroup13"
+            ,{expiresIn:'3d'}// => secret key
         );
 
         return res.status(200).send({ status: true, message: "Success", data: { userId: user._id, token: token } })
