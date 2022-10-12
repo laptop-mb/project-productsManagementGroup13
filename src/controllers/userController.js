@@ -14,22 +14,18 @@ const createUser = async function(req,res){
         if(!Object.keys(data).length || !files)
         return res.status(400).send({status:false,message:"Send data in body"})
 
-        {
             if(userVal.isValidName(data.fname))
             return res.status(400).send({status:false,message:"fname is invalid"})
-        }
-
-        {
+        
             if(userVal.isValidName(data.lname))
             return res.status(400).send({status:false,message:"lname is invalid"})
-        }
-        {
+    
             if(userVal.isValidEmail(data.email))
             return res.status(400).send({status:false,message:"email is invalid"})
             const dataEmail= await userModel.findOne({email:data.email})
             if(dataEmail)
             return res.status(400).send({status:false,message:"email already exists"})
-        }
+        
         if(files[0].fieldname=="profileImage" && files && files.length>0)
         {
             let url = await awsCon.uploadFile(files[0])
@@ -37,22 +33,20 @@ const createUser = async function(req,res){
         }else{
             return res.status(400).send({status:false,message:"profileImage is required"})
         }
-        {
+
             if(userVal.isValidMobile(data.phone))
             return res.status(400).send({status:false,message:"phone is invalid"})
             const dataPhone= await userModel.findOne({phone:data.phone})
             if(dataPhone)
             return res.status(400).send({status:false,message:"phone already exists"})
 
-        }
-        {
             if(userVal.isPassword(data.password))
             return res.status(400).send({status:false,message:"password is invalid"})
             let dataHash = await bcrypt.hash(data.password, 10)
             if(!dataHash) return res.status(400).send({status:false,message:"Cant hash password"})
             data.password = dataHash
             
-        }
+        
         try{data.address = JSON.parse(data.address)}
         catch(err){return res.status(400).send({status:false,message:"address not given or invalid",msg:err.message})
         }   
@@ -81,10 +75,9 @@ const createUser = async function(req,res){
 
         let savedData = await userModel.create(data)
       return   res.status(201).send({  "status": true,"message": "User created successfully",data: savedData})
- 
-        
 
     }
+
     catch(error){
         res.status(500).send({msg: error.message})
 
@@ -146,9 +139,15 @@ const updateUser = async function(req,res){
             data.password = dataHash
             
         }
+        
         if(data.address!=undefined)
         {
-            data.address = JSON.parse(data.address)
+            try{data.address = JSON.parse(data.address)}
+            catch(err){return res.status(400).send({status:false,message:"address not given or invalid",msg:err.message})
+            }   
+            if(!data.address.shipping || !data.address.billing)
+            return res.status(400).send({status:false,message:"shipping or billing address not given"})
+        
             if(data.address.shipping!=undefined)
             {
                 if(data.address.shipping.street!=undefined)
@@ -178,7 +177,7 @@ const updateUser = async function(req,res){
         }
         
         let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
-         return res.status(200).send({status:false,data:createUser})
+         return res.status(200).send({status:true,data:createUser})
 
     }
     catch(error){
