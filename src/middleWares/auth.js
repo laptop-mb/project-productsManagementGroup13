@@ -18,7 +18,7 @@ const Authentication = async function (req, res, next) {
             .status(401)
             .send({ status: false, message: "Not a Valid Token or Token Expired" });
         }
-        console.log(response.exp,Date.now())
+        // console.log(response.exp,Date.now())
         req.userId = response.userId
 
         next()

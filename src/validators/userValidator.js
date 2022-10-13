@@ -76,8 +76,12 @@ const isValidMobile = function (mobile) {
         }
 
         let phone = isPhoneNumber(mobile)
+        let phone2 = /^[6-9][0-9]+$/.test(mobile)
 
         if (phone == false) {
+            return "Please provide valid phone Number !" 
+        }
+        if (phone2 == false) {
             return "Please provide valid phone Number !" 
         }
         }
@@ -144,4 +148,4 @@ const isValidPincode = function (pincode) {
 
 
 
-module.exports = {isValidId,isValidName,isValidMobile,isValidEmail,isValids3,isValidPincode,isPassword}
+module.exports = {isValidId,isValidName,isValidMobile,isValidEmail,isValids3,isValidPincode,isValidateNum,isPassword,isValidate}
