@@ -6,6 +6,9 @@ function whitespace(str) {
 function stringContainsNumber(_string) {
     return /\d/.test(_string);
 }
+function stringContainsAlphabet(_string) {
+    return /^[0-9]*$/.test(_string.trim());
+}
 
 function isEmail(emailAdress) {
     let regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -32,6 +35,7 @@ function isPhoneNumber(number){
 
 function isPincode(pin){
     let regex = /^\d{6}$/;
+    console.log(pin, regex.test(pin))
     return regex.test(pin)
 }
 
@@ -126,26 +130,7 @@ const isPassword = function (password) {
 }
 
 
-const isValidPincode = function (pincode) {
-    try {
-        if (!isValidateNum(pincode)) {
-            return "pincode  should be given and type string! "
-        }
-        // if (whitespace(pincode)) {
-        //     return "Make sure pincode  should not have space ! " 
-        // }
-
-        let Pincode = isPincode(pincode)
-        if (Pincode == false) {
-            return "Please provide valid Pincode !" 
-        }
-
-    }
-    catch (error) {
-        return error.message
-    }
-}
 
 
 
-module.exports = {isValidId,isValidName,isValidMobile,isValidEmail,isValids3,isValidPincode,isValidateNum,isPassword,isValidate}
+module.exports = {stringContainsAlphabet,isValidId,isValidName,isValidMobile,isValidEmail,isValids3,isPincode,isValidateNum,isPassword,isValidate}

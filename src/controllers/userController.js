@@ -14,19 +14,19 @@ const createUser = async function(req,res){
         if(!Object.keys(data).length || !files)
         return res.status(400).send({status:false,message:"Send data in body"})
 
-            if(userVal.isValidName(data.fname))
-            return res.status(400).send({status:false,message:"fname is required or invalid"})
-        
-            if(userVal.isValidName(data.lname))
-            return res.status(400).send({status:false,message:"lname is invalid or required"})
+        if(userVal.isValidName(data.fname))
+        return res.status(400).send({status:false,message:"fname is invalid"})
     
-            if(userVal.isValidEmail(data.email))
-            return res.status(400).send({status:false,message:"email is invalid or required"})
-            const dataEmail= await userModel.findOne({email:data.email})
-            if(dataEmail)
-            return res.status(400).send({status:false,message:"email already exists"})
-        
-        if(files[0].fieldname=="profileImage" && files && files.length>0)
+        if(userVal.isValidName(data.lname))
+        return res.status(400).send({status:false,message:"lname is invalid"})
+
+        if(userVal.isValidEmail(data.email))
+        return res.status(400).send({status:false,message:"email is invalid"})
+        const dataEmail= await userModel.findOne({email:data.email})
+        if(dataEmail)
+        return res.status(400).send({status:false,message:"email already exists"})
+
+        if(files && files.length>0 && (files[0].fieldname=="profileImage"||files[0].fieldname=="profile"))
         {
             let url = await awsCon.uploadFile(files[0])
             data.profileImage = url
@@ -34,17 +34,17 @@ const createUser = async function(req,res){
             return res.status(400).send({status:false,message:"profileImage is required or invalid"})
         }
 
-            if(userVal.isValidMobile(data.phone))
-            return res.status(400).send({status:false,message:"phone is invalid or required"})
-            const dataPhone= await userModel.findOne({phone:data.phone})
-            if(dataPhone)
-            return res.status(400).send({status:false,message:"phone already exists"})
+        if(userVal.isValidMobile(data.phone))
+        return res.status(400).send({status:false,message:"phone is invalid"})
+        const dataPhone= await userModel.findOne({phone:data.phone})
+        if(dataPhone)
+        return res.status(400).send({status:false,message:"phone already exists"})
 
-            if(userVal.isPassword(data.password))
-            return res.status(400).send({status:false,message:"password is invalid or required"})
-            let dataHash = await bcrypt.hash(data.password, 10)
-            if(!dataHash) return res.status(400).send({status:false,message:"Cant hash password"})
-            data.password = dataHash
+        if(userVal.isPassword(data.password))
+        return res.status(400).send({status:false,message:"password is invalid"})
+        let dataHash = await bcrypt.hash(data.password, 10)
+        if(!dataHash) return res.status(400).send({status:false,message:"Cant hash password"})
+        data.password = dataHash
             
         
         try{data.address = JSON.parse(data.address)}
@@ -54,21 +54,21 @@ const createUser = async function(req,res){
             return res.status(400).send({status:false,message:"shipping or billing address not given"})
         
         {
-            if(userVal.isValidName(data.address.shipping.street))
+            if(!userVal.isValidate(data.address.shipping.street))
             return res.status(400).send({status:false,message:"shipping street is not given or invalid"})
-            if(userVal.isValidName(data.address.shipping.city))
+            if(!userVal.isValidate(data.address.shipping.city))
             return res.status(400).send({status:false,message:"shipping city is not given or invalid"})
-            if(userVal.isValidPincode(data.address.shipping.pincode))
+            if(!userVal.isPincode(data.address.shipping.pincode))
             return res.status(400).send({status:false,message:"shipping pincode is not given or invalid"})
             
             
         }
         {
-            if(userVal.isValidName(data.address.billing.street))
+            if(!userVal.isValidate(data.address.billing.street))
             return res.status(400).send({status:false,message:"billing street is not given or invalid"})
-            if(userVal.isValidName(data.address.billing.city))
+            if(!userVal.isValidate(data.address.billing.city))
             return res.status(400).send({status:false,message:"billing city is not given or invalid"})
-            if(userVal.isValidPincode(data.address.billing.pincode))
+            if(!userVal.isPincode(data.address.billing.pincode))
             return res.status(400).send({status:false,message:"billing pincode is not given or invalid"})
             
         }
@@ -115,7 +115,8 @@ const updateUser = async function(req,res){
             return res.status(400).send({status:false,message:"email already exists"})
 
         }
-        if(files && files.length>0)
+
+        if(files && files.length>0 && (files[0].fieldname=="profileImage"||files[0].fieldname=="profile"))
         {
             let url = await awsCon.uploadFile(files[0])
             data.profileImage = url
@@ -145,32 +146,30 @@ const updateUser = async function(req,res){
             try{data.address = JSON.parse(data.address)}
             catch(err){return res.status(400).send({status:false,message:"address not given or invalid",msg:err.message})
             }   
-            if(!data.address.shipping || !data.address.billing)
-            return res.status(400).send({status:false,message:"shipping or billing address not given"})
-        
+            
             if(data.address.shipping!=undefined)
             {
                 if(data.address.shipping.street!=undefined)
-                {if(userVal.isValidName(data.address.shipping.street))
+                {if(!userVal.isValidate(data.address.shipping.street))
                 return res.status(400).send({status:false,message:"shipping street is invalid"})
                 }if(data.address.shipping.city!=undefined)
-                {if(userVal.isValidName(data.address.shipping.city))
+                {if(!userVal.isValidate(data.address.shipping.city))
                 return res.status(400).send({status:false,message:"shipping city is invalid"})
                 }if(data.address.shipping.pincode!=undefined)
-                {if(userVal.isValidPincode(data.address.shipping.pincode))
+                {if(!userVal.isPincode(data.address.shipping.pincode))
                 return res.status(400).send({status:false,message:"shipping pincode is invalid"})
                 }
             }
             if(data.address.billing!=undefined)
             {
                 if(data.address.billing.street!=undefined)
-                {if(userVal.isValidName(data.address.billing.street))
+                {if(!userVal.isValidate(data.address.billing.street))
                 return res.status(400).send({status:false,message:"billing street is invalid"})
                 }if(data.address.billing.city!=undefined)
-                {if(userVal.isValidName(data.address.billing.city))
+                {if(!userVal.isValidate(data.address.billing.city))
                 return res.status(400).send({status:false,message:"billing city is invalid"})
                 }if(data.address.billing.pincode!=undefined)
-                {if(userVal.isValidPincode(data.address.billing.pincode))
+                {if(!userVal.isPincode(data.address.billing.pincode))
                 return res.status(400).send({status:false,message:"billing pincode is invalid"})
                 }
             }
@@ -196,8 +195,6 @@ const getUser = async function(req,res){
 
         res.status(200).send({status:true,message:"Success",data:userData})
 
-
-
     }
     catch(err){
         res.status(500).send({msg:err.message})
@@ -221,8 +218,6 @@ const loginUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "wrong password" })
         }
 
-        // let iat = Date.now()
-        // let exp = (iat) + (60 * 1000)
         //token credentials
         let token = jwt.sign(
             {

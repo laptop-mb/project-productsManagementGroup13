@@ -51,7 +51,7 @@ const productSchema = new mongoose.Schema({
         // array of string, at least one size,
         type: [String],
         trim: true,
-        enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
+        //upperCase:true
     },
     installments: {
         type: Number,
