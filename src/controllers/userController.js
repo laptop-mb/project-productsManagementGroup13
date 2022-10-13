@@ -15,13 +15,13 @@ const createUser = async function(req,res){
         return res.status(400).send({status:false,message:"Send data in body"})
 
         if(userVal.isValidName(data.fname))
-        return res.status(400).send({status:false,message:"fname is invalid"})
+        return res.status(400).send({status:false,message:"fname is required or invalid"})
     
         if(userVal.isValidName(data.lname))
-        return res.status(400).send({status:false,message:"lname is invalid"})
+        return res.status(400).send({status:false,message:"lname is equired or invalid"})
 
         if(userVal.isValidEmail(data.email))
-        return res.status(400).send({status:false,message:"email is invalid"})
+        return res.status(400).send({status:false,message:"email is equired or invalid"})
         const dataEmail= await userModel.findOne({email:data.email})
         if(dataEmail)
         return res.status(400).send({status:false,message:"email already exists"})
@@ -35,13 +35,13 @@ const createUser = async function(req,res){
         }
 
         if(userVal.isValidMobile(data.phone))
-        return res.status(400).send({status:false,message:"phone is invalid"})
+        return res.status(400).send({status:false,message:"phone is equired or invalid"})
         const dataPhone= await userModel.findOne({phone:data.phone})
         if(dataPhone)
         return res.status(400).send({status:false,message:"phone already exists"})
 
         if(userVal.isPassword(data.password))
-        return res.status(400).send({status:false,message:"password is invalid"})
+        return res.status(400).send({status:false,message:"password is equired or invalid"})
         let dataHash = await bcrypt.hash(data.password, 10)
         if(!dataHash) return res.status(400).send({status:false,message:"Cant hash password"})
         data.password = dataHash

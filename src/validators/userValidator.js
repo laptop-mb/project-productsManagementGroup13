@@ -35,7 +35,6 @@ function isPhoneNumber(number){
 
 function isPincode(pin){
     let regex = /^\d{6}$/;
-    console.log(pin, regex.test(pin))
     return regex.test(pin)
 }
 
