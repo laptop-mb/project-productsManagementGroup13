@@ -302,12 +302,12 @@ const deleteProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "productId is not valid" })
         }
 
-        let checkProduct = await productModel.findOne({ _id: productId, isDeleted: false })
+        let checkProduct =await productModel.findOneAndUpdate({ _id: productId, isDeleted: false  }, { isDeleted: true, deletedAt: new Date() })
+        
         if (!checkProduct) {
-            return res.status(404).send({ status: false, message: "Sorry! ProductId not found" })
+            return res.status(404).send({ status: false, message: "Sorry! Product not found" })
         }
-
-        await productModel.findOneAndUpdate({ _id: productId }, { isDeleted: true, deletedAt: new Date() })
+        
         res.status(200).send({ status: true, message: "Product has been deleted successfully" })
 
     }
