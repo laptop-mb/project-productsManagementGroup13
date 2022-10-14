@@ -184,7 +184,7 @@ const updateUser = async function(req,res){
     }
 }
 
-const getUser = async function(req,res){
+const getUserbyId = async function(req,res){
     try{
         //check in authorization valid obj Id
         let userId = req.params.userId
@@ -233,4 +233,4 @@ const loginUser = async function (req, res) {
     }
 }
 
-module.exports ={ createUser,updateUser,loginUser,getUser}
+module.exports ={ createUser,updateUser,loginUser,getUserbyId}
