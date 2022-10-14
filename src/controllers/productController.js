@@ -16,8 +16,8 @@ const isValidSize = (sizes) => {
  
 //--------------------boolean validation---------------------//
 const isValidBoolean = (value) => {
-    if (!(typeof value === "boolean")) return false
-    return true
+    if (!( value == "true" || value=="false")) return true
+    return false
 }
 
 
@@ -26,16 +26,16 @@ const createProduct = async function (req, res) {
         let data = req.body
         let files = req.files
 
-        if (!Object.keys(data).length || !files)
+        if (!Object.keys(data).length && !files)
             return res.status(400).send({ status: false, message: "Send data in body" })
 
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = data
 
+        if (valid.isValidName(title))
+        return res.status(400).send({ status: false, message: "title is required or invalid" })
+
         let duplicateTitle = await productModel.findOne({ title: title });
         if (duplicateTitle) return res.status(400).send({ status: false, message: "title already exist in use" });
-
-        if (valid.isValidName(title))
-            return res.status(400).send({ status: false, message: "title is required or invalid" })
 
         if (valid.isValidName(description))
             return res.status(400).send({ status: false, message: "description is required or invalid" })
@@ -43,17 +43,19 @@ const createProduct = async function (req, res) {
         if (!valid.stringContainsAlphabet(price))
             return res.status(400).send({ status: false, message: "price is required or invalid" })
 
+        if(installments!=undefined)
         if (!valid.stringContainsAlphabet(installments))
             return res.status(400).send({ status: false, message: "installments is required or invalid" })
 
         //will check style vali.
-
+        if(style!=undefined)
         if (valid.isValidName(style))
             return res.status(400).send({ status: false, message: "style is  invalid" })
-
-        if (isValidBoolean(isFreeShipping))
-            return res.status(400).send({ status: false, message: "isFreeShipping is required or invalid" })
-
+        if(isFreeShipping!=undefined)
+        { if (isValidBoolean(isFreeShipping.trim()))
+            return res.status(400).send({ status: false, message: "isFreeShipping is invalid" })
+            data.isFreeShipping=isFreeShipping.trim()
+        }
         if (files && files.length > 0 && (files[0].fieldname == "productImage" || files[0].fieldname == "image") ) {
             let url = await awsCon.uploadFile(files[0])
             data.productImage = url
@@ -62,11 +64,13 @@ const createProduct = async function (req, res) {
         }
 
         if (currencyId!=undefined)
-        {if(!valid.isValidate(currencyId)) return res.status(400).send({ status: false, message: "currencyId wrong format" });
+        {currencyId = currencyId.trim()
+            if(!valid.isValidate(currencyId)) return res.status(400).send({ status: false, message: "currencyId wrong format" });
         if (currencyId != 'INR') return res.status(400).send({ status: false, message: "only indian currencyId INR accepted" });
         }
         if (currencyFormat!=undefined)
-        {if (!valid.isValidate(currencyFormat)) return res.status(400).send({ status: false, message: "currencySymbol wrong format" });
+        {currencyFormat=currencyFormat.trim()
+            if (!valid.isValidate(currencyFormat.trim())) return res.status(400).send({ status: false, message: "currencySymbol wrong format" });
         if (currencyFormat != '₹') return res.status(400).send({ status: false, message: "only indian currency ₹ accepted " });
         }
 
@@ -129,13 +133,14 @@ const getProducts = async function(req,res)
     if (!Object.keys(query).every((elem) => ["size", "name","priceGreaterThan", "priceLessThan","priceSort"].includes(elem))) {
         return res.status(400).send({ status: false, message: "wrong Parameters found" });
     }
-    if(query.size)
+    if(query.size!=undefined)
     {
         if (isValidSize(availableSizes))return res.status(400).send({ status: false, message: "availableSizes is required or invalid" })
         let sizesList = query.size.toUpperCase().split(",").map(x => x.trim());
         body.availableSizes = sizesList 
     }
-    if(query.name)
+    //handle empty string
+    if(query.name!=undefined)
     {
         if(valid.isValidName(query.name))
         return res.status(400).send({ status: false, message: "name is invalid" })
@@ -143,12 +148,12 @@ const getProducts = async function(req,res)
         body.title = regex
     }
 
-    if(query.priceGreaterThan)
+    if(query.priceGreaterThan!=undefined)
     if(!valid.stringContainsAlphabet(query.priceGreaterThan) ||
     parseInt(query.priceGreaterThan)<0)
     return res.status(400).send({ status: false, message: "Invalid priceGreaterThan provided" });       
     
-    if(query.priceLessThan)
+    if(query.priceLessThan!=undefined)
     if(!valid.stringContainsAlphabet(query.priceLessThan) ||
     parseInt(query.priceLessThan)<0 )
     return res.status(400).send({ status: false, message: "Invalid priceLessThan provided" });       
@@ -166,7 +171,7 @@ const getProducts = async function(req,res)
         body.price = { $lt: parseInt(query.priceLessThan)}    
 
     
-    if(query.priceSort)
+    if(query.priceSort!=undefined)
     {
     if (!["1","-1"].includes(query.priceSort)) {
         return res.status(400).send({ status: false, message: "wrong value in sort" });

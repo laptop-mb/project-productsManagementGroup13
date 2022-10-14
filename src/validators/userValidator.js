@@ -3,9 +3,11 @@
 function whitespace(str) {
     return str.trim().indexOf(" ") >= 0
 }
+//should not contain number
 function stringContainsNumber(_string) {
     return /\d/.test(_string);
 }
+//only contain number
 function stringContainsAlphabet(_string) {
     return /^[0-9]*$/.test(_string.trim());
 }
