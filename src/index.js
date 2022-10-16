@@ -16,7 +16,7 @@ mongoose.connect("mongodb+srv://bansalmonika123:mona@cluster0.4rsiaju.mongodb.ne
 
 app.use('/', route);
 
-app.all("/*", function (req, res) {
+app.use("/*", function (req, res) {
     res.status(404).send({ status: false, message: "Kindly give correct information in path param ! UNDERSTAND" });
 });
 

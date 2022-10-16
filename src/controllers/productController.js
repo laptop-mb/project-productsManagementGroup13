@@ -34,7 +34,7 @@ const createProduct = async function (req, res) {
         if (valid.isValidName(title))
         return res.status(400).send({ status: false, message: "title is required or invalid" })
 
-        let duplicateTitle = await productModel.findOne({ title: title });
+        let duplicateTitle = await productModel.findOne({ title: title});
         if (duplicateTitle) return res.status(400).send({ status: false, message: "title already exist in use" });
 
         if (valid.isValidName(description))
@@ -64,14 +64,16 @@ const createProduct = async function (req, res) {
         }
 
         if (currencyId!=undefined)
-        {currencyId = currencyId.trim()
+        {
+            currencyId = currencyId.trim()
             if(!valid.isValidate(currencyId)) return res.status(400).send({ status: false, message: "currencyId wrong format" });
-        if (currencyId != 'INR') return res.status(400).send({ status: false, message: "only indian currencyId INR accepted" });
+            if (currencyId != 'INR') return res.status(400).send({ status: false, message: "only indian currencyId INR accepted" });
         }
         if (currencyFormat!=undefined)
-        {currencyFormat=currencyFormat.trim()
+        {
+            currencyFormat=currencyFormat.trim()
             if (!valid.isValidate(currencyFormat.trim())) return res.status(400).send({ status: false, message: "currencySymbol wrong format" });
-        if (currencyFormat != '₹') return res.status(400).send({ status: false, message: "only indian currency ₹ accepted " });
+            if (currencyFormat != '₹') return res.status(400).send({ status: false, message: "only indian currency ₹ accepted " });
         }
 
         if (isValidSize(availableSizes)) return res.status(400).send({ status: false, message: "availableSizes is required or invalid" })
@@ -101,7 +103,7 @@ const getProducstById = async function (req, res) {
         if (!valid.isValidId(productId))
             return res.status(400).send({ status: false, message: "Invalid Product ID" });
 
-        let getProduct = await productModel.findById(productId);
+        let getProduct = await productModel.findOne({_id:productId, isDeleted:false});
 
         if (!getProduct)
             return res.status(404).send({
@@ -134,16 +136,16 @@ const getProducts = async function (req, res) {
     }
     if(query.size!=undefined)
     {
-        if (isValidSize(availableSizes))return res.status(400).send({ status: false, message: "availableSizes is required or invalid" })
+        if (isValidSize(query.size))return res.status(400).send({ status: false, message: "availableSizes is required or invalid" })
         let sizesList = query.size.toUpperCase().split(",").map(x => x.trim());
-        body.availableSizes = sizesList 
+        body.availableSizes = {$in:sizesList }
     }
     //handle empty string
     if(query.name!=undefined)
     {
         if(valid.isValidName(query.name))
         return res.status(400).send({ status: false, message: "name is invalid" })
-        const regex =  new RegExp(query.name.trim(),'g')
+        const regex =  new RegExp(query.name.trim(),'i')
         body.title = regex
     }
 
@@ -180,7 +182,6 @@ const getProducts = async function (req, res) {
         data = await productModel.find(body).sort({ price: query.priceSort })
 
     }
-        console.log(body)
         if (!check)
             data = await productModel.find(body)
 
@@ -188,6 +189,7 @@ const getProducts = async function (req, res) {
             return res.status(404).send({ status: false, message: "Products do not exist" })
 
         return res.status(200).send({ status: true, data: data })
+
 
     }
     catch (error) {
@@ -216,7 +218,7 @@ const updateProduct = async function (req, res) {
             if (valid.isValidName(title))
                 return res.status(400).send({ status: false, message: "title is invalid" })
         }
-        const checkTitle = await productModel.findOne({ title: title })
+        const checkTitle = await productModel.findOne({ title: title})
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "title already exists. Please try another." })
         }
@@ -264,11 +266,12 @@ const updateProduct = async function (req, res) {
         if (currencyFormat != undefined) {
             if (isValidSize(availableSizes)) return res.status(400).send({ status: false, message: "availableSizes is invalid" })
         }
-        let product = await productModel.findById(productId)
+        let product = await productModel.findOne({_id:productId,isDeleted:false})
         if(!product)
         return res.status(404).send({status:false,message:"Product not found"})
        
-        // input array
+        if(availableSizes!=undefined)
+        {// input array
         let sizesList = availableSizes.toUpperCase().split(",").map(x => x.trim());
         //existing array
         let productSizes = product.availableSizes
@@ -278,7 +281,7 @@ const updateProduct = async function (req, res) {
         productSizes.map((elem)=>{if(!sizesList.includes(elem))   
                                     addArr.push(elem)})
 
-        data.availableSizes = addArr
+        data.availableSizes = addArr}
 
         let updatedProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, data ,{ new: true })
         

@@ -9,18 +9,13 @@ function stringContainsNumber(_string) {
 }
 //only contain number
 function stringContainsAlphabet(_string) {
-    return /^[0-9]*$/.test(_string.trim());
+    return /^[0-9.]*$/.test(_string.trim());
 }
 
 function isEmail(emailAdress) {
     let regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     // w use for char * use for breakpoint $ for end
     return regex.test(emailAdress)       
-}
-
-function isValids3(s3Url){
-    let regex=/(s3-|s3\.)?(.*)\.amazonaws\.com/
-    return regex.test(s3Url)
 }
 
 function isValidId(Id){
@@ -46,15 +41,6 @@ const isValidate= function (value) {
     return false;
   };
 
-  const isValidateNum= function (value) {
-    if (typeof value === "undefined" || value === null) return false;
-    if (typeof value === "number") return true;
-    return false;
-  };
-
-
-
-
 const isValidName = function(name){
     try{
         if(!isValidate(name)){
@@ -75,9 +61,6 @@ const isValidMobile = function (mobile) {
     try {
         if (!isValidate(mobile)) {
             return "mobile number should be given and type string! "
-        }
-        if (whitespace(mobile)) {
-            return "Make sure mobile  number should not have space ! " 
         }
 
         let phone = isPhoneNumber(mobile)
@@ -101,9 +84,7 @@ const isValidEmail = function (email) {
         if (!isValidate(email)) {
             return "email should be given and type string! "
         }
-        if (whitespace(email)) {
-            return "Make sure email should not have any  space ! " 
-        }
+
         let EmailId = isEmail(email)
         if (EmailId == false) {
             return "Please provide valid email address !" 
@@ -134,4 +115,4 @@ const isPassword = function (password) {
 
 
 
-module.exports = {stringContainsAlphabet,isValidId,isValidName,isValidMobile,isValidEmail,isValids3,isPincode,isValidateNum,isPassword,isValidate}
+module.exports = {stringContainsAlphabet,isValidId,isValidName,isValidMobile,isValidEmail,isPincode,isPassword,isValidate}
