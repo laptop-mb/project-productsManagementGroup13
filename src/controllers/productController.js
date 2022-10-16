@@ -180,7 +180,7 @@ const getProducts = async function (req, res) {
         data = await productModel.find(body).sort({ price: query.priceSort })
 
     }
-        console.log(body)
+        // console.log(body)
         if (!check)
             data = await productModel.find(body)
 
@@ -321,3 +321,8 @@ const deleteProduct = async function (req, res) {
 
 
 module.exports = { getProducts, createProduct, getProducstById, deleteProduct, updateProduct }
+
+
+
+
+
