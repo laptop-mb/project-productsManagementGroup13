@@ -176,7 +176,7 @@ const updateUser = async function(req,res){
         let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
          if(!createUser)
          return res.status(404).send({status:false,message:"user not found"})
-         return res.status(200).send({status:true,data:createUser})
+         return res.status(200).send({status:true,message:"Success",data:createUser})
 
     }
     catch(error){

@@ -14,7 +14,7 @@ const createCart = async function(req,res){
             return res.status(400).send({status: false, message:  "productId should be valid or required"})
         }
 
-        const checkUser = await userModel.findOne({_id:userId, isDeleted: false})
+        const checkUser = await userModel.findOne({_id:userId})
         if(!checkUser){
             return res.status(404).send({status: false, message: "no such user exist"})
         }
@@ -33,7 +33,7 @@ const createCart = async function(req,res){
         
         let cartItems={}
         cartItems.userId = userId
-
+        //cart does not exist
         if(!checkCart){
             cartItems.items = {productId:productId, quantity:1}
             cartItems.totalPrice = checkProduct.price
@@ -42,6 +42,7 @@ const createCart = async function(req,res){
         else{        
         let match = checkCart.items.filter((elem)=>elem.productId == productId)
         let nomatch = checkCart.items.filter((elem)=>elem.productId != productId)
+        //cart exists but product does not
         if(match.length==0)
         {
              checkCart.items.push({productId, quantity:1})
@@ -50,6 +51,7 @@ const createCart = async function(req,res){
             cartItems.totalItems = 1+checkCart.totalItems
 
         }
+        //cart exists and product also exists
         else
         {
             match[0].quantity = match[0].quantity+1
@@ -62,7 +64,7 @@ const createCart = async function(req,res){
 
         }
         let newCartCreation = await cartModel.findOneAndUpdate({userId:userId},cartItems,{new:true,upsert:true})
-        return res.status(201).send({status: true, data: newCartCreation})
+        return res.status(201).send({status: true, message:"Success",data: newCartCreation})
         // its mean that user has already the cart we will update the cart
 
     }
@@ -76,7 +78,7 @@ const getCart = async function(req,res){
     try{
         let userId = req.params.userId
 
-        let checkUser = await userModel.findOne({userId, isDeleted: false})
+        let checkUser = await userModel.findOne({userId})
         if(!checkUser){
             return res.status(404).send({status: false, message: "no such user exist"})
         }
@@ -87,7 +89,7 @@ const getCart = async function(req,res){
             return res.status(404).send({status: false, message: "no such cart found with this userId"})
         }
 
-        return res.status(200).send({status: true, data: checkCart})
+        return res.status(200).send({status: true,message:"Success", data: checkCart})
 
     }
 

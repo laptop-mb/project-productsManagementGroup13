@@ -84,7 +84,7 @@ const createProduct = async function (req, res) {
 
 
         let savedData = await productModel.create(data)
-        return res.status(201).send({ status: true, message: "success", data: savedData })
+        return res.status(201).send({ status: true, message: "Success", data: savedData })
 
 
     }
@@ -188,7 +188,7 @@ const getProducts = async function (req, res) {
         if (!data.length)
             return res.status(404).send({ status: false, message: "Products do not exist" })
 
-        return res.status(200).send({ status: true, data: data })
+        return res.status(200).send({ status: true,message:"Success", data: data })
 
 
     }
@@ -286,7 +286,7 @@ const updateProduct = async function (req, res) {
         let updatedProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, data ,{ new: true })
         
         
-        return res.status(200).send({ status: true, message: "success", data: updatedProduct })
+        return res.status(200).send({ status: true, message: "Success", data: updatedProduct })
 
 
     }
