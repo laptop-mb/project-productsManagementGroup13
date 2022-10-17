@@ -1,9 +1,7 @@
 const userModel = require("../models/userModel")
 const userVal = require("../validators/userValidator")
 const jwt = require("jsonwebtoken")
-
 const bcrypt = require("bcrypt")
-
 const awsCon = require("../controllers/awsController")
 
 const createUser = async function(req,res){
@@ -176,6 +174,8 @@ const updateUser = async function(req,res){
         }
         
         let createUser = await userModel.findOneAndUpdate({_id:userId},data,{new:true})
+         if(!createUser)
+         return res.status(404).send({status:false,message:"user not found"})
          return res.status(200).send({status:true,data:createUser})
 
     }

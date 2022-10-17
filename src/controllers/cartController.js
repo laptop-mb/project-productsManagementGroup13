@@ -1,4 +1,3 @@
-const { findOne } = require("../models/cartModel")
 const cartModel = require("../models/cartModel")
 const productModel = require("../models/productModel")
 const userModel = require("../models/userModel")
@@ -11,55 +10,60 @@ const createCart = async function(req,res){
         let productId = req.body.productId
         let cartId = req.body.cartId
         
-        if(!valid.isValidId(userId)){
-            return res.status(400).send({status: false, message: "userId is not valid"})
-        }
-        if(!valid.isValidId(productId) && !productId){
+        if(!valid.isValidId(productId) || !productId){
             return res.status(400).send({status: false, message:  "productId should be valid or required"})
         }
-        // if(!productId){
-        //     return res.status(400).send({status: false, message: "productId is mandatory"})
-        // }
 
-        let quantity = 1
-
-        const checkUser = await userModel.findOne({userId, isDeleted: false})
+        const checkUser = await userModel.findOne({_id:userId, isDeleted: false})
         if(!checkUser){
             return res.status(404).send({status: false, message: "no such user exist"})
         }
         
-        const checkProduct = await productModel.findOne({productId, isDeleted: false})
+        const checkProduct = await productModel.findOne({_id:productId, isDeleted: false})
         if(!checkProduct){
             return res.status(404).send({status: false, message: "no such product exist"})
         }
 
         const checkCart = await cartModel.findOne({userId})
         // if user has no cart the we will create a new cart for him/her
-        if(!checkCart){
-            let cartItems = {}
-            cartItems.userId = userId
-            cartItems.items = {productId, quantity}
-            cartItems.totalPrice = checkProduct.price * quantity
-            cartItems.totalItems = 1
         
-        let newCartCreation = await cartModel.create(cartItems)
+        if(checkCart)
+        if(cartId!=checkCart._id)
+        return res.status(400).send({status:false, message:"pls send cartId and it should be valid"})
+        
+        let cartItems={}
+        cartItems.userId = userId
+
+        if(!checkCart){
+            cartItems.items = {productId:productId, quantity:1}
+            cartItems.totalPrice = checkProduct.price
+            cartItems.totalItems = 1
+        }
+        else{        
+        let match = checkCart.items.filter((elem)=>elem.productId == productId)
+        let nomatch = checkCart.items.filter((elem)=>elem.productId != productId)
+        if(match.length==0)
+        {
+             checkCart.items.push({productId, quantity:1})
+             cartItems.items = checkCart.items
+            cartItems.totalPrice = checkProduct.price+checkCart.totalPrice
+            cartItems.totalItems = 1+checkCart.totalItems
+
+        }
+        else
+        {
+            match[0].quantity = match[0].quantity+1
+            nomatch.push(match[0])
+             cartItems.items = nomatch
+            cartItems.totalPrice = checkProduct.price+checkCart.totalPrice
+            cartItems.totalItems = checkCart.totalItems
+
+        }
+
+        }
+        let newCartCreation = await cartModel.findOneAndUpdate({userId:userId},cartItems,{new:true,upsert:true})
         return res.status(201).send({status: true, data: newCartCreation})
         // its mean that user has already the cart we will update the cart
-        }else{
-            if(!cartId) return res.status(400).send({status: false, message: "plz enter cartId"})
-        }
-        if(!valid.isValidId(cartId)) return res.status(400).send({status: false, message: "cartId is not valid"})
-
-        const getCart = await cartModel.findOne({userId, cartId})
-        if(!getCart) return res.status(404).send({status: false, message: "no such cart exist with the given cartId and UserId"})
-
-
-        // abhi ye incomple h, abhi bad me krungi...
-
-
-
-
-        
 
     }
     catch(error){
@@ -71,10 +75,6 @@ const createCart = async function(req,res){
 const getCart = async function(req,res){
     try{
         let userId = req.params.userId
-
-        if(!valid.isValidId(userId)){
-            return res.status(400).send({status: false, message: "userId is invalid"})
-        }
 
         let checkUser = await userModel.findOne({userId, isDeleted: false})
         if(!checkUser){

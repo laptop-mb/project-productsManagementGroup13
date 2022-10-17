@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const userModel = require("../models/userModel");
 const validation = require("../validators/userValidator")
 
 
@@ -35,10 +34,6 @@ const Authorization = async function (req, res, next)  {
         let userId = req.params.userId
 
         if (!validation.isValidId(userId)) return res.status(400).send({ status: false, message: "User id not valid" });
-
-        // finding user in DB
-        let checkUser = await userModel.findById(userId)
-        if (!checkUser) return res.status(404).send({ status: false, message: "User not found" })
 
         // authorizing the user
         if (userId != req.userId) return res.status(403).send({ status: false, message: "user not authorized" })
