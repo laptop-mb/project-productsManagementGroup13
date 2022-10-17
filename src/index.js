@@ -16,6 +16,7 @@ mongoose.connect("mongodb+srv://bansalmonika123:mona@cluster0.4rsiaju.mongodb.ne
 
 app.use('/', route);
 
+// question --> yha app.all hi to lgta h
 app.use("/*", function (req, res) {
     res.status(404).send({ status: false, message: "Kindly give correct information in path param ! UNDERSTAND" });
 });
