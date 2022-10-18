@@ -106,9 +106,6 @@ const updateCart = async function (req, res) {
         if (!Object.keys(data).length === 0) {
             return res.status(400).send({ status: false, message: "no such data found to update" })
         }
-        if (!valid.isValidId(userId) ) {
-            return res.status(400).send({ status: false, message: "userId should be valid or required" })
-        }
         if (!valid.isValidId(cartId) ) {
             return res.status(400).send({ status: false, message: "cartId should be valid or required" })
         }
@@ -133,10 +130,12 @@ const updateCart = async function (req, res) {
 
         let match = checkCart.items.filter((elem) => elem.productId == productId)
         let nomatch = checkCart.items.filter((elem) => elem.productId != productId)
+        if(removeProduct!=0 && removeProduct!=1)
+        return res.status(400).send({ status: false, message: "invalid value in removeproduct" })
 
         if (match.length!=0) {
             let Price = match[0].quantity * checkProduct.price
-            if (removeProduct == 0 || (match[0].quantity == 1 && removeProduct == 1)) {
+            if (removeProduct == 0 || match[0].quantity == 1) {
                     updatedCartItem = await cartModel.findOneAndUpdate({ _id: cartId },
                     {
                         $set: {
