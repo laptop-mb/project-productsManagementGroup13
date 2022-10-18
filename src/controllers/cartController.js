@@ -172,7 +172,33 @@ const updateCart = async function (req, res) {
         return res.status(500).send({ status: false, message: error.message })
     }
 }
+const deleteCart = async function (req, res) {
+
+    try {
+        let userId = req.params.userId
+
+        if (!valid.isValidId(userId)) {
+            return res.status(400).send({ status: false, message: "productId is not valid" })
+        }
+
+        let checkProduct =await cartModel.findOneAndUpdate({ userId }, { items: [] ,
+            totalPrice: 0,
+            totalItems: 0 ,
+            })
+        
+        if (!checkProduct) {
+            return res.status(404).send({ status: false, message: "Sorry! Product not found" })
+        }
+        
+        res.status(200).send({ status: true, message: "Product has been deleted successfully" })
+
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
+    }
+
+}
 
 
 
-module.exports = { createCart, getCart, updateCart }
+module.exports = { createCart, getCart, updateCart,deleteCart }
