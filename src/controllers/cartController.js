@@ -166,7 +166,7 @@ const updateCart = async function (req, res) {
             return res.status(404).send({ status: false, message: "product doesn't exist in cart" })
         }
 
-            return res.status(200).send({ status: true, message: "removed product", data: updatedCartItem })
+            return res.status(200).send({ status: true, message: "Success", data: updatedCartItem })
         }
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })
@@ -177,20 +177,16 @@ const deleteCart = async function (req, res) {
     try {
         let userId = req.params.userId
 
-        if (!valid.isValidId(userId)) {
-            return res.status(400).send({ status: false, message: "productId is not valid" })
-        }
-
-        let checkProduct =await cartModel.findOneAndUpdate({ userId }, { items: [] ,
+        let checkCart =await cartModel.findOneAndUpdate({ userId }, { items: [] ,
             totalPrice: 0,
             totalItems: 0 ,
             })
         
-        if (!checkProduct) {
-            return res.status(404).send({ status: false, message: "Sorry! Product not found" })
+        if (!checkCart) {
+            return res.status(404).send({ status: false, message: "Sorry! Cart not found" })
         }
         
-        res.status(200).send({ status: true, message: "Product has been deleted successfully" })
+        res.status(200).send({ status: true, message: "Cart has been deleted successfully" })
 
     }
     catch (err) {
