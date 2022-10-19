@@ -33,7 +33,7 @@ const createOrder = async function (req,res){
         placeOrder.status = "pending" //it will be updated from updated api
 
         const orderData = await orderModel.create(placeOrder)
-        return res.status(201).send({status: true, message: "success", data: orderData})
+        return res.status(201).send({status: true, message: "Success", data: orderData})
         
 
     }
