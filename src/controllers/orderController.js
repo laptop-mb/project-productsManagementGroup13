@@ -17,7 +17,7 @@ const createOrder = async function (req,res){
             return res.status(400).send({status: false, message: "cartId is not valid and required"})
         }
         if(data.cancellable!=undefined){
-            if(typeof cancellable != "boolean")
+            if(typeof data.cancellable != "boolean")
             return res.status(400).send({status: false, message: "Cancellable should be boolean "})
         }
         const checkCart = await cartModel.findOne({_id: cartId, userId: userId})
@@ -35,9 +35,10 @@ const createOrder = async function (req,res){
         placeOrder.totalItems = checkCart.totalItems
         placeOrder.totalPrice = checkCart.totalPrice
         placeOrder.totalQuantity = total
+        placeOrder.cancellable = data.cancellable
         placeOrder.status = "pending" //it will be updated from updated api
 
-        const orderData = await orderModel.create(placeOrder).populate('items.productId')
+        const orderData = await orderModel.findOneAndUpdate({userId},placeOrder,{new:true,upsert:true}).populate('items.productId')
         await cartModel.findOneAndUpdate({_id: cartId, userId: userId},{items: [] ,
             totalPrice: 0,
             totalItems: 0 })
