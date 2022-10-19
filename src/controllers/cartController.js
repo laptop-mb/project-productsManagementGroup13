@@ -171,6 +171,9 @@ const updateCart = async function (req, res) {
         return res.status(500).send({ status: false, message: error.message })
     }
 }
+
+
+
 const deleteCart = async function (req, res) {
 
     try {
@@ -185,7 +188,7 @@ const deleteCart = async function (req, res) {
             return res.status(404).send({ status: false, message: "Sorry! Cart not found" })
         }
         
-        res.status(200).send({ status: true, message: "Cart has been deleted successfully" })
+        res.status(204).send({ status: true, message: "Cart has been deleted successfully" })
 
     }
     catch (err) {
