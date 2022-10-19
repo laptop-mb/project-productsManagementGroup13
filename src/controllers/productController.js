@@ -34,7 +34,7 @@ const createProduct = async function (req, res) {
         if (valid.isValidName(title))
         return res.status(400).send({ status: false, message: "title is required or invalid" })
 
-        let duplicateTitle = await productModel.findOne({ title: title});
+        let duplicateTitle = await productModel.findOne({ title: title, isDeleted:false});
         if (duplicateTitle) return res.status(400).send({ status: false, message: "title already exist in use" });
 
         if (valid.isValidName(description))
@@ -110,9 +110,6 @@ const getProducstById = async function (req, res) {
                 status: false,
                 message: "ProductID not found ",
             });
-
-        if (getProduct.isDeleted == true)
-            return res.status(404).send({ status: false, message: "Product not found" });
 
         return res.status(200).send({ status: true, message: "Success", data: getProduct });
 
@@ -218,7 +215,7 @@ const updateProduct = async function (req, res) {
             if (valid.isValidName(title))
                 return res.status(400).send({ status: false, message: "title is invalid" })
         }
-        const checkTitle = await productModel.findOne({ title: title})
+        const checkTitle = await productModel.findOne({ title: title, isDeleted:false})
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "title already exists. Please try another." })
         }
@@ -266,9 +263,6 @@ const updateProduct = async function (req, res) {
         if (currencyFormat != undefined) {
             if (isValidSize(availableSizes)) return res.status(400).send({ status: false, message: "availableSizes is invalid" })
         }
-        let product = await productModel.findOne({_id:productId,isDeleted:false})
-        if(!product)
-        return res.status(404).send({status:false,message:"Product not found"})
        
         if(availableSizes!=undefined)
         {// input array
@@ -284,7 +278,8 @@ const updateProduct = async function (req, res) {
         data.availableSizes = addArr}
 
         let updatedProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, data ,{ new: true })
-        
+        if(!updatedProduct)
+        return res.status(404).send({status:false,message:"Product not found"})
         
         return res.status(200).send({ status: true, message: "Success", data: updatedProduct })
 

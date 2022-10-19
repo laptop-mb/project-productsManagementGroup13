@@ -29,7 +29,9 @@ router.get("/users/:userId/cart",auth.Authentication,auth.Authorization,cartCont
 router.put("/users/:userId/cart",auth.Authentication,auth.Authorization,cartController.updateCart)
 router.delete("/users/:userId/cart",auth.Authentication,auth.Authorization,cartController.deleteCart)
 
-//================================order===============================================//
+//===============================order=================================================//
+
+router.put("/users/:userId/orders",auth.Authentication,auth.Authorization,orderController.updateOrder)
 
 router.post("/users/:userId/orders",auth.Authentication,auth.Authorization,orderController.createOrder)
 

@@ -14,11 +14,6 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, message: "productId should be valid or required" })
         }
 
-        const checkUser = await userModel.findOne({ _id: userId })
-        if (!checkUser) {
-            return res.status(404).send({ status: false, message: "no such user exist" })
-        }
-
         const checkProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!checkProduct) {
             return res.status(404).send({ status: false, message: "no such product exist" })
@@ -29,7 +24,7 @@ const createCart = async function (req, res) {
 
         if (checkCart)
             if (cartId != checkCart._id)
-                return res.status(400).send({ status: false, message: "pls send cartId and it should be valid" })
+                return res.status(400).send({ status: false, message: "pls send cartId and it should be of given user" })
 
         let cartItems = {}
         cartItems.userId = userId
@@ -75,11 +70,6 @@ const getCart = async function (req, res) {
     try {
         let userId = req.params.userId
 
-        let checkUser = await userModel.findOne({ userId })
-        if (!checkUser) {
-            return res.status(404).send({ status: false, message: "no such user exist" })
-        }
-
         // getting cart summary by using populate method..... and we have to return products details also
         let checkCart = await cartModel.findOne({ userId }).populate("items.productId")
         if (!checkCart) {
@@ -119,7 +109,7 @@ const updateCart = async function (req, res) {
         }
         const checkCart = await cartModel.findOne({ _id: cartId, userId: userId })
         if (!checkCart) {
-            return res.status(400).send({ status: false, message: "no such cart exist with the given cartId and userId" })
+            return res.status(404).send({ status: false, message: "no such cart exist with the given cartId and userId" })
         }
         const checkProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!checkProduct) {
@@ -183,12 +173,12 @@ const deleteCart = async function (req, res) {
             totalPrice: 0,
             totalItems: 0 ,
             })
-        
-        if (!checkCart) {
-            return res.status(404).send({ status: false, message: "Sorry! Cart not found" })
+
+        if (checkCart.totalItems==0) {
+            return res.status(404).send({ status: false, message: "Cart already empty" })
         }
         
-        res.status(204).send({ status: true, message: "Cart has been deleted successfully" })
+        return res.status(204).send()
 
     }
     catch (err) {
