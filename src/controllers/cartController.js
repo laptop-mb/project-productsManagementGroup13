@@ -180,12 +180,12 @@ const deleteCart = async function (req, res) {
             totalPrice: 0,
             totalItems: 0 ,
             })
-        
-        if (!checkCart) {
-            return res.status(404).send({ status: false, message: "Sorry! Cart not found" })
+
+        if (checkCart.totalItems==0) {
+            return res.status(404).send({ status: false, message: "Cart already empty" })
         }
         
-        res.status(200).send({ status: true, message: "Cart has been deleted successfully" })
+        return res.status(204).send({ status: true, message: "Cart has been deleted successfully" })
 
     }
     catch (err) {

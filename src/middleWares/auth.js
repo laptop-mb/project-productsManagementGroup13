@@ -11,7 +11,7 @@ const Authentication = async function (req, res, next) {
 
         token=token.split(" ")[1]
 
-       let decodedToken =  jwt.verify( token, "project/productManagementGroup13",(error, response) => {
+       jwt.verify( token, "project/productManagementGroup13",(error, response) => {
         if (error) {
           return res
             .status(401)
@@ -21,6 +21,7 @@ const Authentication = async function (req, res, next) {
 
         next()
         })
+        
         
             
     } catch (error) {
@@ -37,7 +38,11 @@ const Authorization = async function (req, res, next)  {
 
         // authorizing the user
         if (userId != req.userId) return res.status(403).send({ status: false, message: "user not authorized" })
-
+        
+        let user = await userModel.findOne({ _id: req.userId });
+        if (!user) {
+            return res.status(404).send({ status: false, message: "User Not found" });
+        }
         next()
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
