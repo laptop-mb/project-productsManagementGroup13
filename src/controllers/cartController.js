@@ -9,6 +9,11 @@ const createCart = async function (req, res) {
         let userId = req.params.userId
         let productId = req.body.productId
         let cartId = req.body.cartId
+        let data = req.body
+
+        if (!data.every((elem) => ["productId","cartId"].includes(elem))) {
+            return res.status(400).send({ status: false, message: "only productId and cartId keys allowed" })
+        }
 
         if (!valid.isValidId(productId) || !productId) {
             return res.status(400).send({ status: false, message: "productId should be valid or required" })
@@ -92,6 +97,10 @@ const updateCart = async function (req, res) {
         const userId = req.params.userId
         const data = req.body
         const { cartId, productId, removeProduct } = data
+
+        if (!data.every((elem) => ["productId","cartId","removeProduct"].includes(elem))) {
+            return res.status(400).send({ status: false, message: "only productId, cartId and removeProduct keys allowed" })
+        }
 
         if (!Object.keys(data).length === 0) {
             return res.status(400).send({ status: false, message: "no such data found to update" })

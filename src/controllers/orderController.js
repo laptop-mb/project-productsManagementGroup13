@@ -8,7 +8,11 @@ const updateOrder = async function(req,res)
         const orderId = req.body.orderId
         const status = req.body.status
         const userId = req.params.userId
+        const data = req.body
 
+        if (!data.every((elem) => ["orderId","status"].includes(elem))) {
+            return res.status(400).send({ status: false, message: "only orderId and status keys allowed" })
+        }
         if (!["pending", "completed", "cancelled"].includes(status)) {
             return res.status(400).send({status:false,message:"pls send correct status, only [pending,completed,cancelled] allowed"})
         }
@@ -20,17 +24,11 @@ const updateOrder = async function(req,res)
         if(!checkOrder)
         return res.status(404).send({status:false,message:"Order does not exist"})
 
-        if(checkOrder.cancellable!="cancellable" && status=="cancelled")
+        if(checkOrder.cancellable!=true && status=="cancelled")
         return res.status(400).send({status:false,message:"Order is not cancellable"})
 
-        let updatedOrder= null
-
-        if(status!="pending")
-             updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId,userId },
-                {status,isDeleted:true,deletedAt:Date.now()},{new:true})
-        else
-            return res.status(200).send({ status: false, message: "Success", data:checkOrder })
-
+        let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId,userId },{status},{new:true})
+       
         return res.status(200).send({ status: true, message: "Success", data:updatedOrder })
 
     }
