@@ -34,7 +34,7 @@ const createProduct = async function (req, res) {
         if (valid.isValidName(title))
         return res.status(400).send({ status: false, message: "title is required or invalid" })
 
-        let duplicateTitle = await productModel.findOne({ title: title, isDeleted:false});
+        let duplicateTitle = await productModel.findOne({ title: title});
         if (duplicateTitle) return res.status(400).send({ status: false, message: "title already exist in use" });
 
         if (valid.isValidName(description))
@@ -215,7 +215,7 @@ const updateProduct = async function (req, res) {
             if (valid.isValidName(title))
                 return res.status(400).send({ status: false, message: "title is invalid" })
         }
-        const checkTitle = await productModel.findOne({ title: title, isDeleted:false})
+        const checkTitle = await productModel.findOne({ title: title})
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "title already exists. Please try another." })
         }
@@ -263,7 +263,9 @@ const updateProduct = async function (req, res) {
         if (availableSizes != undefined) {
             if (isValidSize(availableSizes)) return res.status(400).send({ status: false, message: "availableSizes is invalid" })
         // input array
-        let product = productModel.findOne({_id:productId,isDeleted:false})
+        let product = await productModel.findOne({_id:productId,isDeleted:false})
+        if(!product)
+        return res.status(404).send({status:false,message:"Product not found"})
 
         let sizesList = availableSizes.toUpperCase().split(",").map(x => x.trim());
         //existing array
