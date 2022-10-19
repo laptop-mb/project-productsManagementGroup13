@@ -20,7 +20,7 @@ const createOrder = async function (req,res){
             if(typeof data.cancellable != "boolean")
             return res.status(400).send({status: false, message: "Cancellable should be boolean "})
         }
-        const checkCart = await cartModel.findOne({_id: cartId, userId: userId})
+        const checkCart = await cartModel.findOne({_id: cartId, userId: userId}).populate('items.productId')
         if(!checkCart){
             return res.status(400).send({status: false, message: "no such cart exist with this cartId and userId"})
         }
@@ -38,12 +38,15 @@ const createOrder = async function (req,res){
         placeOrder.cancellable = data.cancellable
         placeOrder.status = "pending" //it will be updated from updated api
 
-        const orderData = await orderModel.findOneAndUpdate({userId},placeOrder,{new:true,upsert:true}).populate('items.productId')
+        let orderData = await orderModel.create(placeOrder)
+        let order  = orderData.toObject()
+        order.items =checkCart.items
+ 
         await cartModel.findOneAndUpdate({_id: cartId, userId: userId},{items: [] ,
             totalPrice: 0,
             totalItems: 0 })
 
-        return res.status(201).send({status: true, message: "Success", data: orderData})
+         return res.status(201).send({status: true, message: "Success", data: order})
         
 
     }
