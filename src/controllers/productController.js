@@ -260,12 +260,11 @@ const updateProduct = async function (req, res) {
             if (!valid.isValidate(currencyFormat)) return res.status(400).send({ status: false, message: "currencySymbol wrong format" });
             if (currencyFormat != '₹') return res.status(400).send({ status: false, message: "only indian currency ₹ accepted " });
         }
-        if (currencyFormat != undefined) {
+        if (availableSizes != undefined) {
             if (isValidSize(availableSizes)) return res.status(400).send({ status: false, message: "availableSizes is invalid" })
-        }
-       
-        if(availableSizes!=undefined)
-        {// input array
+        // input array
+        let product = productModel.findOne({_id:productId,isDeleted:false})
+
         let sizesList = availableSizes.toUpperCase().split(",").map(x => x.trim());
         //existing array
         let productSizes = product.availableSizes

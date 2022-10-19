@@ -1,7 +1,57 @@
+const cartModel = require("../models/cartModel")
 const orderModel = require("../models/orderModel")
 const valid = require("../validators/userValidator")
 
-const updateOrder = async function(req,res)
+const createOrder = async function (req,res){
+    try{
+        let userId = req.params.userId
+        let cartId = req.body.cartId
+        let data = req.body
+
+        //  question --> is cartId required
+        if (!Object.keys(data).every((elem) => ["cancellable","cartId"].includes(elem))) {
+            return res.status(400).send({ status: false, message: "only cancellable and cartId keys allowed" })
+        }
+
+        if(!valid.isValidId(cartId)){
+            return res.status(400).send({status: false, message: "cartId is not valid and required"})
+        }
+        if(data.cancellable!=undefined){
+            if(typeof cancellable != "boolean")
+            return res.status(400).send({status: false, message: "Cancellable should be boolean "})
+        }
+        const checkCart = await cartModel.findOne({_id: cartId, userId: userId})
+        if(!checkCart){
+            return res.status(400).send({status: false, message: "no such cart exist with this cartId and userId"})
+        }
+        if(!checkCart.items.length){
+            return res.status(400).send({status: false, message: "bro, you can't order with empty cart..."})
+        }
+        let total = 0
+        checkCart.items.forEach(element => total += element.quantity)
+        let placeOrder = {}
+        placeOrder.userId = userId
+        placeOrder.items = checkCart.items
+        placeOrder.totalItems = checkCart.totalItems
+        placeOrder.totalPrice = checkCart.totalPrice
+        placeOrder.totalQuantity = total
+        placeOrder.status = "pending" //it will be updated from updated api
+
+        const orderData = await orderModel.create(placeOrder).populate('items.productId')
+        await cartModel.findOneAndUpdate({_id: cartId, userId: userId},{items: [] ,
+            totalPrice: 0,
+            totalItems: 0 })
+
+        return res.status(201).send({status: true, message: "Success", data: orderData})
+        
+
+    }
+    catch(error){
+        return res.status(500).send({message: error.message})
+    }
+}
+
+ const updateOrder = async function(req,res)
 {
     try
     {
@@ -10,11 +60,11 @@ const updateOrder = async function(req,res)
         const userId = req.params.userId
         const data = req.body
 
-        if (!data.every((elem) => ["orderId","status"].includes(elem))) {
+        if (!Object.keys(data).every((elem) => ["orderId","status"].includes(elem))) {
             return res.status(400).send({ status: false, message: "only orderId and status keys allowed" })
         }
-        if (!["pending", "completed", "cancelled"].includes(status)) {
-            return res.status(400).send({status:false,message:"pls send correct status, only [pending,completed,cancelled] allowed"})
+        if (!["completed", "cancelled"].includes(status)) {
+            return res.status(400).send({status:false,message:"pls send correct status, only [completed,cancelled] allowed"})
         }
 
         if (!valid.isValidId(orderId)) {
@@ -27,7 +77,10 @@ const updateOrder = async function(req,res)
         if(checkOrder.cancellable!=true && status=="cancelled")
         return res.status(400).send({status:false,message:"Order is not cancellable"})
 
-        let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId,userId },{status},{new:true})
+        if(checkOrder.status == status)
+        return res.status(400).send({status:false, message:"Already done. Give different input"})
+
+        let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId,userId },{status},{new:true}).populate('items.productId')
        
         return res.status(200).send({ status: true, message: "Success", data:updatedOrder })
 
@@ -38,4 +91,4 @@ const updateOrder = async function(req,res)
     }
 }
 
-module.exports= {updateOrder}
+module.exports= {createOrder,updateOrder}

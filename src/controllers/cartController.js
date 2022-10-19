@@ -1,6 +1,5 @@
 const cartModel = require("../models/cartModel")
 const productModel = require("../models/productModel")
-const userModel = require("../models/userModel")
 const valid = require("../validators/userValidator")
 
 
@@ -11,7 +10,7 @@ const createCart = async function (req, res) {
         let cartId = req.body.cartId
         let data = req.body
 
-        if (!data.every((elem) => ["productId","cartId"].includes(elem))) {
+        if (!Object.keys(data).every((elem) => ["productId","cartId"].includes(elem))) {
             return res.status(400).send({ status: false, message: "only productId and cartId keys allowed" })
         }
 
@@ -98,7 +97,7 @@ const updateCart = async function (req, res) {
         const data = req.body
         const { cartId, productId, removeProduct } = data
 
-        if (!data.every((elem) => ["productId","cartId","removeProduct"].includes(elem))) {
+        if (!Object.keys(data).every((elem) => ["productId","cartId","removeProduct"].includes(elem))) {
             return res.status(400).send({ status: false, message: "only productId, cartId and removeProduct keys allowed" })
         }
 
@@ -112,10 +111,6 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, message: "productId should be valid or required" })
         }
 
-        const checkUser = await userModel.findOne({ _id: userId })
-        if (!checkUser) {
-            return res.status(404).send({ status: false, message: "no such user exist with the given userId" })
-        }
         const checkCart = await cartModel.findOne({ _id: cartId, userId: userId })
         if (!checkCart) {
             return res.status(404).send({ status: false, message: "no such cart exist with the given cartId and userId" })
@@ -170,19 +165,22 @@ const updateCart = async function (req, res) {
         return res.status(500).send({ status: false, message: error.message })
     }
 }
+
+
+
 const deleteCart = async function (req, res) {
 
     try {
         let userId = req.params.userId
 
-        let checkCart =await cartModel.findOneAndUpdate({ userId }, { items: [] ,
+        let checkCart =await cartModel.findOne({ userId})
+        if(!checkCart)
+        return res.status(404).send({status:false,message:"Cart already empty"})
+
+        await cartModel.findOneAndUpdate({ userId }, { items: [] ,
             totalPrice: 0,
             totalItems: 0 ,
             })
-
-        if (checkCart.totalItems==0) {
-            return res.status(404).send({ status: false, message: "Cart already empty" })
-        }
         
         return res.status(204).send()
 

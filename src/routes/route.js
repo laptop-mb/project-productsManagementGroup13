@@ -4,7 +4,6 @@ const userController = require("../controllers/userController")
 const productController = require("../controllers/productController")
 const cartController = require("../controllers/cartController")
 const orderController = require("../controllers/orderController")
-
 const auth = require("../middlewares/auth")
 
 
@@ -34,6 +33,7 @@ router.delete("/users/:userId/cart",auth.Authentication,auth.Authorization,cartC
 
 router.put("/users/:userId/orders",auth.Authentication,auth.Authorization,orderController.updateOrder)
 
+router.post("/users/:userId/orders",auth.Authentication,auth.Authorization,orderController.createOrder)
 
 
 
