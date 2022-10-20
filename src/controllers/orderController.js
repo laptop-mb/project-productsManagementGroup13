@@ -8,7 +8,6 @@ const createOrder = async function (req,res){
         let cartId = req.body.cartId
         let data = req.body
 
-        //  question --> is cartId required
         if (!Object.keys(data).every((elem) => ["cancellable","cartId"].includes(elem))) {
             return res.status(400).send({ status: false, message: "only cancellable and cartId keys allowed" })
         }
