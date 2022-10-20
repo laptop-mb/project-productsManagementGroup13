@@ -174,7 +174,7 @@ const deleteCart = async function (req, res) {
         let userId = req.params.userId
 
         let checkCart =await cartModel.findOne({ userId})
-        if(!checkCart)
+        if(!checkCart.totalItems)
         return res.status(404).send({status:false,message:"Cart already empty"})
 
         await cartModel.findOneAndUpdate({ userId }, { items: [] ,
