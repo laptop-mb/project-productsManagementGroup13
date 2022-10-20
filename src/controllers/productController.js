@@ -31,13 +31,13 @@ const createProduct = async function (req, res) {
 
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = data
 
-        if (valid.isValidate(title))
+        if (!valid.isValidate(title))
         return res.status(400).send({ status: false, message: "title is required or invalid" })
 
         let duplicateTitle = await productModel.findOne({ title: title});
         if (duplicateTitle) return res.status(400).send({ status: false, message: "title already exist in use" });
 
-        if (valid.isValidate(description))
+        if (!valid.isValidate(description))
             return res.status(400).send({ status: false, message: "description is required or invalid" })
 
         if (!valid.stringContainsAlphabet(price))
@@ -212,7 +212,7 @@ const updateProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "Send data in body" })
 
         if (title != undefined) {
-            if (valid.isValidate(title))
+            if (!valid.isValidate(title))
                 return res.status(400).send({ status: false, message: "title is invalid" })
         }
         const checkTitle = await productModel.findOne({ title: title})
@@ -222,7 +222,7 @@ const updateProduct = async function (req, res) {
 
 
         if (description != undefined) {
-            if (valid.isVaidate(description))
+            if (!valid.isValidate(description))
                 return res.status(400).send({ status: false, message: "description is invalid" })
         }
 
